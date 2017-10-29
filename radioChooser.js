@@ -65,6 +65,28 @@ function chooseRadioStation(station){
 
 
 }
+/**
+ * @param {string} station
+ * @param {string} name
+ */
+
+function fillStationsWithSavedOnes(station,name) {
+    var stations = {};
+    stations[name]=station;
+
+    chrome.storage.sync.set(stations);
+}
+
+/**
+ * @param {string} stations
+ * @param {function} callback
+ */
+
+function getStationsWithSavedOnes(stations,callback) {
+    chrome.storage.sync.get(stations, (stations) => {
+        callback(chrome.runtime.lastError ? null : stations[0]);
+});
+}
 
 /**
  * Gets the saved radio station.
@@ -105,9 +127,25 @@ function saveRadioStation(state,station) {
 document.addEventListener('DOMContentLoaded', () => {
     getCurrentTabUrl((url) => {
     var dropdown = document.getElementById('radioStations');
+    var stationAddBtn = document.getElementById("stationAdd");
 
     // Load the radio station that is last played  and modify the dropdown
     // value, if needed.
+
+
+    getStationsWithSavedOnes("stations",(stations) => {
+
+        if(stations){
+
+            for (var i = 0; i<=stations.length; i++){
+                var opt = document.createElement('option');
+                opt.value = i;
+                opt.innerHTML = i;
+                dropdown.appendChild(opt);
+            }
+
+        }
+    });
 
 
     getSavedRadioStation("played",(playedStation) => {
@@ -121,11 +159,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ensure the background color is changed and saved when the dropdown
     // selection changes.
     dropdown.addEventListener('change', () => {
-        chooseRadioStation(dropdown.value);
+        chooseRadioStation(this.value);
         saveRadioStation("played",dropdown.value);
 
 
     });
+    stationAddBtn.addEventListener("click",() => {
+        var stationAddInput = document.getElementById("stationUrl").value;
+        fillStationsWithSavedOnes(stationAddInput,"name:"+stationAddInput);
+
+    })
+
     });
 });
 

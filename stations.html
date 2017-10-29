@@ -22,6 +22,22 @@
             display: flex;
             justify-content: space-between;
         }
+        .playerContainer{
+            position: relative;
+            width: 100%;
+
+        }
+        .player{
+            position: relative;
+            width: 100%;
+            float:left;
+
+        }
+        .radioSelect{
+            position: relative;
+            width: 50%;
+            float:left;
+        }
     </style>
 
     <!--
@@ -34,19 +50,27 @@
 </head>
 
 <body>
-<h1>Radio Stations Plugin</h1>
-<audio id="audioPlayer" controls>
-    <source src="">
-</audio>
+<div class="playerContainer">
 
-<div id="container">
+    <h1>Radio Stations Plugin</h1>
+    <audio id="audioPlayer" controls class="player">
+        <source src="">
+    </audio>
 
-    <label for="radioStations">Select your radio Station</label>
-    <select id="radioStations">
-        <option selected disabled hidden value=''></option>
-        <option value="https://wdr-1live-live.sslcast.addradio.de/wdr/1live/live/mp3/128/stream.mp3">1Live</option>
+    <div id="container" class="radioSelect">
 
-    </select>
+        <label for="radioStations">Select your radio Station</label>
+        <select id="radioStations">
+            <option selected disabled hidden value=''></option>
+            <option value="https://wdr-1live-live.sslcast.addradio.de/wdr/1live/live/mp3/128/stream.mp3">1Live</option>
+
+        </select>
+
+        <label for="stationUrl"> Add Your Stations</label>
+        <input type="text" id="stationUrl">
+        <button id="stationAdd">Add Station</button>
+    </div>
+
 </div>
 </body>
 </html>
