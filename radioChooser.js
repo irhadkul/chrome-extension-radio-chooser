@@ -116,6 +116,9 @@ function saveRadioStation(state,station) {
     chrome.storage.sync.set(items);
 }
 
+function TagTest(){
+
+}
 // This extension loads the saved background color for the current tab if one
 // exists. The user can select a new background color from the dropdown for the
 // current page, and it will be saved as part of the extension's isolated
