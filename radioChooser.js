@@ -1,9 +1,6 @@
 /**
  * Created by Irhad on 29.10.2017.
  */
-// Copyright (c) 2014 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 
 /**
  * Get the current URL.
@@ -40,14 +37,6 @@ function getCurrentTabUrl(callback) {
     callback(url);
 });
 
-    // Most methods of the Chrome extension APIs are asynchronous. This means that
-    // you CANNOT do something like this:
-    //
-    // var url;
-    // chrome.tabs.query(queryInfo, (tabs) => {
-    //   url = tabs[0].url;
-    // });
-    // alert(url); // Shows "undefined", because chrome.tabs.query is async.
 }
 
 /**
@@ -62,19 +51,26 @@ function chooseRadioStation(station){
     audioPlayer.src = station;
     audioPlayer.play();
 
-
-
 }
 /**
  * @param {string} station
- * @param {string} name
+ * @param {string} url
  */
 
-function fillStationsWithSavedOnes(station,name) {
-    var stations = {};
-    stations[name]=station;
+function fillStationsWithSavedOnes(station,url) {
+ getStationsWithSavedOnes(null,function (stations) {
+     if(stations.stations === undefined){
+         var items = {};
+         items["stations"]=[{name:station,url:url}];
+         chrome.storage.globStorage.set(items);
+     }else {
+         stations["stations"].push({name:station,url:url});
+         chrome.storage.globStorage.set(stations);
+     }
+     updateDropdownValues();
 
-    chrome.storage.sync.set(stations);
+
+ });
 }
 
 /**
@@ -83,9 +79,10 @@ function fillStationsWithSavedOnes(station,name) {
  */
 
 function getStationsWithSavedOnes(stations,callback) {
-    chrome.storage.sync.get(stations, (stations) => {
-        callback(chrome.runtime.lastError ? null : stations[0]);
+    chrome.storage.globStorage.get(stations, (stations) => {
+        callback(chrome.runtime.lastError ? null : stations);
 });
+
 }
 
 /**
@@ -97,12 +94,11 @@ function getStationsWithSavedOnes(stations,callback) {
 
 function getSavedRadioStation(state,callback){
 
-    chrome.storage.sync.get(state, (items) => {
+    chrome.storage.globStorage.get(state, (items) => {
         callback(chrome.runtime.lastError ? null : items[state]);
 });
 
 }
-
 
 /**
  * saves radio station with given state
@@ -113,20 +109,30 @@ function getSavedRadioStation(state,callback){
 function saveRadioStation(state,station) {
     var items = {};
     items[state] = station;
-    chrome.storage.sync.set(items);
+    chrome.storage.globStorage.set(items);
 }
 
-function TagTest(){
+/**
+ * function to update dropdown values of the radio stations
+ */
+function updateDropdownValues(){
+    var dropdown = document.getElementById('radioStations');
 
+    getStationsWithSavedOnes("stations",(stations) => {
+
+        if(stations.stations){
+        dropdown.innerHTML="";
+        stations.stations.forEach(function (p1, p2, p3){
+            var opt = document.createElement('option');
+            opt.value = p1.url;
+            opt.innerHTML = p1.name;
+            dropdown.appendChild(opt);
+        })
+
+    }
+});
 }
-// This extension loads the saved background color for the current tab if one
-// exists. The user can select a new background color from the dropdown for the
-// current page, and it will be saved as part of the extension's isolated
-// storage. The chrome.storage API is used for this purpose. This is different
-// from the window.localStorage API, which is synchronous and stores data bound
-// to a document's origin. Also, using chrome.storage.sync instead of
-// chrome.storage.local allows the extension data to be synced across multiple
-// user devices.
+
 document.addEventListener('DOMContentLoaded', () => {
     getCurrentTabUrl((url) => {
     var dropdown = document.getElementById('radioStations');
@@ -135,20 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load the radio station that is last played  and modify the dropdown
     // value, if needed.
 
-
-    getStationsWithSavedOnes("stations",(stations) => {
-
-        if(stations){
-
-            for (var i = 0; i<=stations.length; i++){
-                var opt = document.createElement('option');
-                opt.value = i;
-                opt.innerHTML = i;
-                dropdown.appendChild(opt);
-            }
-
-        }
-    });
+    updateDropdownValues();
 
 
     getSavedRadioStation("played",(playedStation) => {
@@ -156,24 +149,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if(playedStation){
             chooseRadioStation(playedStation);
             dropdown.value=playedStation;
+        }else{
+            chooseRadioStation(dropdown[1].value);
+            dropdown.value=dropdown[1].value;
         }
     });
 
     // Ensure the background color is changed and saved when the dropdown
     // selection changes.
     dropdown.addEventListener('change', () => {
-        chooseRadioStation(this.value);
+        chooseRadioStation(dropdown.value);
         saveRadioStation("played",dropdown.value);
 
 
     });
     stationAddBtn.addEventListener("click",() => {
         var stationAddInput = document.getElementById("stationUrl").value;
-        fillStationsWithSavedOnes(stationAddInput,"name:"+stationAddInput);
+        var stationAddNameInput = document.getElementById("stationName").value;
+        fillStationsWithSavedOnes(stationAddNameInput,stationAddInput);
 
     })
 
     });
 });
+
 
 
