@@ -8,39 +8,34 @@
  */
 var handlebars =require('handlebars');
 var fs = require('fs');
+var through = require('through2');
+var StringDecoder = require('string_decoder').StringDecoder;
 
-exports.compile = function (obj) {
+exports.compile = function (options) {
 
-readTemplates(obj.templates,obj.data);
+
+    return through.obj(function(file, encoding, callback) {
+        var decoder = new StringDecoder('utf8');
+        // decode buffer contents
+        var template = decoder.write(file.contents);
+        // read data for the files
+        var dataToWrite = fs.readFileSync(options.data, "utf8");
+        // replace file extension
+        file.history[0] =file.history[0].substr(0, file.history[0].lastIndexOf(".")) + ".html";
+        // write contents back to buffer
+        file.contents = Buffer.from(writeFilesToHtml(template,JSON.parse(dataToWrite)),'utf8');
+        this.push(file);
+
+        callback();
+    });
+
 
 };
 
-function readTemplates(path,data) {
 
-    fs.readdir(path, function (err, items) {
-        for (var i = 0; i < items.length; i++) {
-            console.log(items[i]);
-            var template = fs.readFileSync(path+"\\" +items[i], "utf8");
-            var dataToWrite = fs.readFileSync(data, "utf8");
-            writeFilesToHtml(template,JSON.parse(dataToWrite),items[i]);
-
-        }
-    });
-}
-
-
-function writeFilesToHtml(file,data,filename) {
-
+function writeFilesToHtml(file,data) {
     var templates = handlebars.compile(file);
-    var result = templates(data);
-    var fileToWrite = filename.replace(/.hbs/i, '.html');
-
-
-    fs.writeFile("src\\"+fileToWrite, result, function(err) {
-        if (err) {
-            return console.log(err);
-        }
-    });
+   return templates(data);
 
 }
 

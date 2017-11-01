@@ -17,6 +17,7 @@
     "handlebars-precompiler": "^2.1.0",
     "loadash": "^1.0.0",
     "lodash": "^4.17.4",
+    "through2": "^2.0.3",
     "uglify-js": "^3.1.6"
   },
   "scripts": {

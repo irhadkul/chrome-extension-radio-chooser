@@ -12,7 +12,7 @@ var paths = {
     scripts: 'src/js/**/*.js',
     images: 'src/images/**/*',
     html: 'src/*.html',
-    html_templates: 'src/html',
+    html_templates: 'src/html/*.hbs',
     html_templates_data:'src/data/tmpl/data.json',
     chrome_ext : 'src/chrome-ext/**/*'
 };
@@ -24,7 +24,7 @@ var destinations ={
 };
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['watch', 'scripts', 'images', 'chrome-ext']);
+gulp.task('default', ['watch', 'scripts', 'images', 'chrome-ext' , 'html']);
 
 // Not all tasks need to use streams
 // A gulpfile is just another node program and you can use any package available on npm
@@ -47,8 +47,9 @@ gulp.task('clean', function() {
 gulp.task('html', ['clean'], function() {
     // Minify and copy all JavaScript (except vendor scripts)
     // with sourcemaps all the way down
-    hbsHtmlPrecompiler.compile({templates:paths.html_templates, data:paths.html_templates_data});
-    return gulp.src(paths.html)
+
+    return gulp.src(paths.html_templates)
+        .pipe(hbsHtmlPrecompiler.compile({templates:paths.html_templates, data:paths.html_templates_data,html:"src"}))
         .pipe(gulp.dest(destinations.html));
 });
 
@@ -80,6 +81,6 @@ gulp.task('chrome-ext', ['clean'], function() {
 gulp.task('watch', function() {
     gulp.watch(paths.scripts, ['scripts']);
     gulp.watch(paths.images, ['images']);
-    gulp.watch(paths.html, ['html']);
+    gulp.watch(paths.html_templates, ['html']);
 });
 
