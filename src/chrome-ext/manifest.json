@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+
+  "name": "Radio Chooser Extension",
+  "description": "This extension allows the user to choose radio stations",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "includes/images/icon.png",
+    "default_popup": "popup.html",
+    "default_title": "Play Your Radio Station!"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ]
+}
